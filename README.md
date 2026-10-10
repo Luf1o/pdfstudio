@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PDF Studio
 
-## Getting Started
+A browser-based workspace for viewing PDF documents. Documents are processed in the browser; Phase 1 does not upload files to a server.
 
-First, run the development server:
+## Setup
+
+Requirements: Node.js 20.9 or newer and npm.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Production builds can be checked with `npm run build` and served with `npm start`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Dependencies
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js, React, TypeScript, and Tailwind CSS provide the application foundation.
+- PDF.js (`pdfjs-dist`) loads and renders PDF pages in the browser using its bundled worker.
 
-## Learn More
+## Implemented in Phase 1
 
-To learn more about Next.js, take a look at the following resources:
+- Responsive dashboard with drag-and-drop or file-picker PDF upload.
+- PDF signature validation and clear errors for invalid files.
+- Local page rendering with previous/next navigation and zoom.
+- Session-only recent documents, while the page remains open.
+- Download of the original PDF without modifying it.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Limitations
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Files larger than 100 MB and password-protected PDFs are not supported.
+- The viewer renders one page at a time. Page thumbnails, text search, annotations, printing, PDF editing, and image-to-PDF conversion are planned for later phases.
+- The viewer does not alter or export edited PDFs in this phase.
+- Uploaded files are held in browser memory; recent documents are not persisted after the session ends.
 
-## Deploy on Vercel
+## Checks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
