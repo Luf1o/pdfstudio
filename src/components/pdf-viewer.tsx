@@ -6,10 +6,11 @@ import { formatFileSize, getPdfErrorMessage } from "@/lib/pdf/format";
 
 type PdfViewerProps = {
   file: File;
+  downloadLabel?: string;
   onClose: () => void;
 };
 
-export function PdfViewer({ file, onClose }: PdfViewerProps) {
+export function PdfViewer({ file, downloadLabel = "Download original", onClose }: PdfViewerProps) {
   const [documentProxy, setDocumentProxy] = useState<PDFDocumentProxy | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageCount, setPageCount] = useState(0);
@@ -157,7 +158,7 @@ export function PdfViewer({ file, onClose }: PdfViewerProps) {
           <span className="viewer-local-note"><span /> Stored on this device</span>
           <button className="download-button" type="button" onClick={downloadOriginal}>
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 17v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            <span>Download original</span>
+            <span>{downloadLabel}</span>
           </button>
           <button className="close-viewer-button" type="button" onClick={onClose} aria-label="Close document">×</button>
         </div>

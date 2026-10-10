@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { ImageToPdf } from "@/components/image-to-pdf";
 import { PdfViewer } from "@/components/pdf-viewer";
 import { formatFileSize, validatePdfFile } from "@/lib/pdf/format";
 import type { RecentDocument } from "@/types/pdf";
@@ -42,6 +43,8 @@ export function Dashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [recentDocuments, setRecentDocuments] = useState<RecentDocument[]>([]);
   const [activeFile, setActiveFile] = useState<File | null>(null);
+  const [isGeneratedPdf, setIsGeneratedPdf] = useState(false);
+  const [isImageToolOpen, setIsImageToolOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +70,7 @@ export function Dashboard() {
         );
         return [{ file, openedAt: Date.now() }, ...withoutDuplicate].slice(0, 5);
       });
+      setIsGeneratedPdf(false);
       setActiveFile(file);
     } catch {
       setError("We couldn't read this file. Try choosing the PDF again.");
@@ -89,9 +93,27 @@ export function Dashboard() {
       <PdfViewer
         key={`${activeFile.name}-${activeFile.size}-${activeFile.lastModified}`}
         file={activeFile}
+        downloadLabel={isGeneratedPdf ? "Download PDF" : "Download original"}
         onClose={() => {
           setActiveFile(null);
           setError(null);
+        }}
+      />
+    );
+  }
+
+  if (isImageToolOpen) {
+    return (
+      <ImageToPdf
+        onBack={() => setIsImageToolOpen(false)}
+        onOpenPdf={(file) => {
+          setRecentDocuments((documents) => [
+            { file, openedAt: Date.now(), isGenerated: true },
+            ...documents.filter(({ file: recentFile }) => recentFile.name !== file.name),
+          ].slice(0, 5));
+          setIsGeneratedPdf(true);
+          setIsImageToolOpen(false);
+          setActiveFile(file);
         }}
       />
     );
@@ -111,6 +133,10 @@ export function Dashboard() {
             <FolderIcon />
             <span>My workspace</span>
           </span>
+          <button className="nav-item nav-button" type="button" onClick={() => setIsImageToolOpen(true)}>
+            <span className="nav-image-icon" aria-hidden="true">▧</span>
+            <span>Image to PDF</span>
+          </button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -179,6 +205,12 @@ export function Dashboard() {
             {error && <p className="error-message" role="alert">{error}</p>}
           </section>
 
+          <button className="image-tool-launcher" type="button" onClick={() => setIsImageToolOpen(true)}>
+            <span className="image-tool-launcher-icon" aria-hidden="true">▧</span>
+            <span><strong>Images to PDF</strong><span>Create a PDF or add image pages to an existing document.</span></span>
+            <span className="image-tool-launcher-arrow" aria-hidden="true">→</span>
+          </button>
+
           <section className="recent-section" aria-labelledby="recent-heading">
             <div className="section-heading recent-heading">
               <div>
@@ -194,9 +226,9 @@ export function Dashboard() {
               </div>
             ) : (
               <ul className="recent-list">
-                {recentDocuments.map(({ file, openedAt }) => (
+                {recentDocuments.map(({ file, openedAt, isGenerated: recentIsGenerated }) => (
                   <li key={`${file.name}-${file.lastModified}-${file.size}`}>
-                    <button className="recent-document" type="button" onClick={() => setActiveFile(file)}>
+                    <button className="recent-document" type="button" onClick={() => { setIsGeneratedPdf(recentIsGenerated ?? false); setActiveFile(file); }}>
                       <span className="recent-file-icon">PDF</span>
                       <span className="recent-file-info"><strong>{file.name}</strong><span>{formatFileSize(file.size)} <span aria-hidden="true">·</span> Opened {new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(openedAt)}</span></span>
                       <span className="recent-open-label">Open PDF <span aria-hidden="true">→</span></span>
